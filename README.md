@@ -10,6 +10,7 @@ Example: Below is an example using a picture of a dog. We resize this to 28 by 2
 
 ![alt text](https://github.com/WToner/Old-Projects/blob/main/ThreeDogsPixels.png?raw=true)
 
+- This project needs to be worked on much more when time permits. The current primary strategy involves 'rounding' each pixel to the nearest palette colour. This is a very poor methodology. Account needs to be taken of the average colour of the resulting images of patches of various sizes.
 
 ## Crypto ## 
 - A project from around Jan 2021 for predicting crypto-currency prices. Historical prices were scraped from various exchanges. Using these one can train simple regression models in an attempt to uncover underlying patterns. 
