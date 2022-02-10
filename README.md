@@ -5,7 +5,7 @@ We have a selection of projects I've worked on over the last year in various sta
 
 PixelArt - Often on social media people present art which has been assembled by combining a number of discrete objects. Examples include art formed from Rubix cubes, dice or sticky notes. I thought, given some finite discrete palette of colours and a target image, can we write a program which produces an image using these colours which is 'near' to this target. In this way we can use this as a colour-by-numbers to help us produce similar art. Below is a picture of a dog made out of coloured thumbtacks made using this method. (Approximately August 2021)
 
-![alt text](https://github.com/WToner/Old-Projects/blob/main/ThreeDogPixels.png?raw=true)
+![alt text](https://github.com/WToner/Old-Projects/blob/main/ThreeDogsPixels.png?raw=true)
 
 
 Crypto - A project from around Jan 2021 for predicting crypto-currency prices. Historical prices were scraped from various exchanges. Using these one can train simple regression models in an attempt to uncover underlying patterns. 
