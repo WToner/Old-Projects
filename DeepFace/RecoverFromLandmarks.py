@@ -22,6 +22,7 @@ from dataset import Landmark, Target_Landmark
 import scipy
 from scipy import linalg
 
+"""test text"""
 def prepare_normaliser(trump_ref, target_ref):
     trump_rim = trump_ref[0:17]
     trump_nose = trump_ref[27:36]
@@ -59,8 +60,8 @@ def normalise(x, normaliser, device):
     a_rim, a_nose, a_eyes_l, a_eyes_r, a_brows, a_mouth = normaliser
 
     batch_size = x.size()[0]
-    x = x[:,4:]
     y = x[:,:4]
+    x = x[:,4:]
     x = x.view(batch_size, 68, 2)
     ones = torch.ones(batch_size, 68, 1).cuda(7)
     x = torch.cat((x,ones), dim=2)
@@ -183,14 +184,15 @@ class Decoder(nn.Module):
 
         return x
 
-def train(args, decoder, discriminator, device, train_loader, optimizer, optimizer_disc, epoch=0):
+def train(args, decoder, device, train_loader, optimizer, optimizer_disc, epoch=0):
     decoder.train()
-    discriminator.train()
+    #discriminator.train()
     total_loss = 0
     i = 0
     for image, landmark in train_loader:
-        rand = random.randint(0,1)
+        #rand = random.randint(0,1)
         #landmark = torch.from_numpy(landmark)
+        rand = 0
         landmark = landmark.to(device, dtype=torch.float)
         if rand == 0:
             batch_size = landmark.shape[0]
@@ -200,15 +202,17 @@ def train(args, decoder, discriminator, device, train_loader, optimizer, optimiz
 
             out = decoder(landmark)
             loss_recon = F.mse_loss(out, image, reduction='sum')
-            fake_stat = discriminator(out)
-            real_stat = discriminator(image)
-            loss_disc = F.mse_loss(fake_stat, real_stat, reduction='sum')
-            loss = loss_recon + loss_disc
+            #fake_stat = discriminator(out)
+            #real_stat = discriminator(image)
+            #loss_disc = F.mse_loss(fake_stat, real_stat, reduction='sum')
+            temporal_loss = F.mse_loss(out[:batch_size-1], out[1:], reduction='sum')
+            #loss = loss_recon + loss_disc
+            loss = loss_recon + 0.1*temporal_loss
             loss.backward()
             optimizer.step()
             total_loss += loss
             i += 1
-        else:
+        """else:
             batch_size = landmark.shape[0]
             optimizer_disc.zero_grad()
             discriminator.zero_grad()
@@ -220,7 +224,7 @@ def train(args, decoder, discriminator, device, train_loader, optimizer, optimiz
             loss_disc = -F.mse_loss(fake_stat, real_stat, reduction='sum')
 
             loss_disc.backward()
-            optimizer_disc.step()
+            optimizer_disc.step()"""
 
     total_loss = total_loss/(i*batch_size)
     print("Training Loss Epoch " + str(epoch) + " is: " + str(total_loss.item()))
@@ -240,6 +244,9 @@ def test(args, decoder, device, test_loader, epoch=0):
         total_loss += loss
         if i == 0:
             print('saving the output')
+            for i in range(50):
+                utils.save_image(out[i].detach(), './Images/fake_samples_iter_' + str(i) + '.png', normalize=True)
+                utils.save_image(image[i].detach(), './Images/true_samples_iter_' + str(i) + '.png', normalize=True)
             utils.save_image(out.detach(), './Images/fake_samples_epoch_' + str(int(epoch)) + '.png',
                                  normalize=True)
         i += 1
@@ -250,14 +257,15 @@ def target(args, normaliser, shift, scale, decoder, device, target_loader, epoch
     decoder.eval()
     i = 0
     for landmark in target_loader:
+        landmark = landmark.to(device)
         edges = landmark[:, 2] - landmark[:, 0]
         edges = edges*scale
         landmark[:,0] = landmark[:,0] + shift[0]
         landmark[:,1] = landmark[:,1] + shift[1]
         landmark[:,2] = landmark[:,0] + edges
         landmark[:, 3] = landmark[:, 1] + edges
-        landmark = landmark.to(device)
         landmark = normalise(landmark, normaliser, device)
+
         #landmark = torch.from_numpy(landmark)
         landmark = landmark.to(device, dtype=torch.float)
         out = decoder(landmark)
@@ -303,10 +311,10 @@ def main():
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
     dataset = Landmark(train=True)
-    train_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=30, num_workers=1, shuffle=True)
+    train_loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=50, num_workers=1, shuffle=True)
 
     dataset_test = Landmark(train=False)
-    test_loader = torch.utils.data.DataLoader(dataset=dataset_test, batch_size=30, num_workers=1, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataset=dataset_test, batch_size=50, num_workers=1, shuffle=False)
 
     decoder = Decoder().to(device)
     optimizer = torch.optim.RMSprop(decoder.parameters(), lr=args.lr)
@@ -315,7 +323,7 @@ def main():
     optimizer_disc = torch.optim.RMSprop(discriminator.parameters(), lr=0.1*args.lr)
 
     target_dataset = Target_Landmark()
-    target_loader = torch.utils.data.DataLoader(dataset=target_dataset, batch_size=50, num_workers=1, shuffle=True)
+    target_loader = torch.utils.data.DataLoader(dataset=target_dataset, batch_size=50, num_workers=1, shuffle=False)
 
     #decoder.load_state_dict(torch.load("/disk/scratch/william/Face/params/decoder_170"))
 
@@ -340,11 +348,13 @@ def main():
     normaliser = prepare_normaliser(trump_ref[4:], target_ref[4:])
 
     for epoch in range(1, args.epochs):
-        train(args, decoder, discriminator, device, train_loader, optimizer, optimizer_disc, epoch=epoch)
-        if epoch % 5 == 0:
+        #target(args, normaliser, shift, scale, decoder, device, target_loader, int(epoch / 10))
+        train(args, decoder, device, train_loader, optimizer, optimizer_disc, epoch=epoch)
+        if epoch % 10 == 0:
             target(args, normaliser, shift, scale, decoder, device, target_loader, int(epoch/10))
             test(args, decoder, device, test_loader, epoch=int(epoch/10))
-            #torch.save(decoder.state_dict(), "/disk/scratch/william/Face/params/decoder_" + str(epoch))
+            torch.save(decoder.state_dict(), "/disk/scratch/william/Face/params/decoder")
+
 
 
 

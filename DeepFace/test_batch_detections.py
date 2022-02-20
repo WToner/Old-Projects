@@ -4,6 +4,7 @@
 # Retinaface+MobileFaceNet gives the best peformance
 # Cunjian Chen (ccunjian@gmail.com), Feb. 2021
 
+#test
 from __future__ import division
 import argparse
 import torch
@@ -35,7 +36,16 @@ args = parser.parse_args()
 mean = np.asarray([ 0.485, 0.456, 0.406 ])
 std = np.asarray([ 0.229, 0.224, 0.225 ])
 
-landmark_file = open("/home/william/Documents/Work/pytorch_face_landmark/landmarks_trump.txt", "w")
+#basepath
+#basepath = "/home/william/Documents/Work/pytorch_face_landmark"
+
+#the file to e the landmarks
+#landmark_file = open("/home/william/Documents/Work/pytorch_face_landmark/landmarks_trump.txt", "w")
+landmark_file = open("/home/william/Documents/Work/test-run/FaceStuff/source_landmarks.txt", "w")
+
+#the files to use as images
+source_images_filenames = "samples/12--Group/*.jpg"
+#source_images_filenames = "/samples/other/*.jpg"
 
 crop_size= 112
 scale = crop_size / 112.
@@ -75,7 +85,7 @@ if __name__ == '__main__':
         out_size = 112 
     model = load_model()
     model = model.eval()
-    filenames=glob.glob("samples/12--Group/*.jpg")
+    filenames=glob.glob(source_images_filenames)
     for imgname in filenames:
         #a = imgname.split("/")
         #print(a[2])
@@ -93,7 +103,7 @@ if __name__ == '__main__':
             faces = face_boxes(img)
         elif args.detector=='Retinaface':
             retinaface=Retinaface.Retinaface()    
-            faces = retinaface(img)
+            faces = retinaface(img)            
         else:
             print('Error: not suppored detector')        
         ratio=0
@@ -107,8 +117,6 @@ if __name__ == '__main__':
             y1=face[1]
             x2=face[2]
             y2=face[3]
-            for i in range(4):
-                landmark_file.write(str(face[i]) + " ")
             w = x2 - x1 + 1
             h = y2 - y1 + 1
             size = int(min([w, h])*1.2)
@@ -185,7 +193,9 @@ if __name__ == '__main__':
             warped_face = warp_and_crop_face(np.array(org_img), facial5points, reference, crop_size=(crop_size, crop_size))
             img_warped = Image.fromarray(warped_face)
             # save the aligned and cropped faces
-            img_warped.save(os.path.join('results_aligned', os.path.basename(imgname)[:-4]+'_'+str(k)+'.png'))  
+            #img_warped.save(os.path.join(basepath + 'results_aligned', os.path.basename(imgname)[:-4]+'_'+str(k)+'.png'))
+            #img_warped.save(
+            #    os.path.join(basepath + '/results_aligned', os.path.basename(imgname)[:-4] + '.png'))
             #img = drawLandmark_multiple(img, new_bbox, facial5points)  # plot and show 5 points   
         # save the landmark detections 
         cv2.imwrite(os.path.join('results',os.path.basename(imgname)),img)

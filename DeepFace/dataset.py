@@ -15,7 +15,7 @@ import os
 import os.path
 from typing import Any, Callable, cast, Dict, List, Optional, Tuple
 
-
+"""test text"""
 class Torus(data.Dataset):
 	def __init__(self, nm_points=50, r1=1, r2=0.5):
 		self.nm_points = nm_points
@@ -657,12 +657,13 @@ class Landmark(data.Dataset):
 		else:
 			self.genSamples(8000, 10000)
 
-		test_row = self.labels[52]
+		test_row = self.labels[439]
 		self.ref_row = test_row.reshape(-1, 2)
 		#plt.scatter(test_row[:,0], 1-test_row[:,1])
 		#plt.savefig("./trumpfig"+str(i)+".png")
 		#plt.clf()
 		#plt.show()
+		#print("Trump ", self.ref_row)
 
 	def get_ref(self):
 		return self.ref_row
@@ -730,14 +731,15 @@ class Target_Landmark(data.Dataset):
 		self.labels = np.concatenate((self.indices, self.labels), 1)
 
 		#test_row = self.labels[12,1:]
-		test_row = self.labels[50, 1:]
-		self.ref_row = test_row.reshape(-1, 2)
 		#plt.scatter(test_row[:,0], 1-test_row[:,1])
 		#plt.savefig("./fig"+str(i)+".png")
 		#plt.clf()
 		#plt.show()
+		#print("Me: ", self.ref_row)
 
 		self.labels = self.labels[np.argsort(self.labels[:,0])]
+		test_row = self.labels[50, 1:]
+		self.ref_row = test_row.reshape(-1, 2)
 
 	def get_ref(self):
 		return self.ref_row
