@@ -25,7 +25,7 @@ Example: Below is an example using a picture of a dog. We resize this to 28 by 2
 - I thought it would be neat to make a program which converts a source video of a person doing an action, to a video of Donald Trump carrying out this action. The method used is taken from the paper "Everyone Can Dance". We use an opensource landmark detector (https://github.com/cunjian/pytorch_face_landmark) and apply it to each frame of a video of Donald Trump. From this we then train a neural network to reconstruct the original image. Having done this we can move to the source video. This is likewise divided into frames which are then converted into landmarks. These are fed into the pre-learnt network to obtain the desired video. Care must be taken to ensure that the source frames are within the support of the trained network and it is here where issues can manifest. Additional problems result from a lack of smooth temporal consistency unless this is included as a loss.
 -As mentioned before, the landmarks are obtained using code from the following repository https://github.com/cunjian/pytorch_face_landmark None of the code for obtaining face landmarks is mine, only the code which builds upon this for creating videos.
 
-![Alt Text](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
+![Alt Text](https://github.com/WToner/Old-Projects/blob/main/recon.gif)
 
 
 
